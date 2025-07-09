@@ -1,0 +1,78 @@
+
+ONES_CITY = [
+    "", "واحد", "اثنين", "ثلاثه", "أربعه", "خمسه", "سته", "سبعه", "ثمانيه", "تسعه"
+]
+
+TENS_CITY = [
+    "", "عشره", "عشرين", "ثلاثين", "أربعين", "خمسين",
+    "ستين", "سبعين", "ثمانين", "تسعين"
+]
+
+TEENS_CITY = [
+    "عشره", "حدعش", "اثنعش", "ثلتعش", "أربعتعش", "خمستعش",
+    "ستتعش", "سبعتعش", "ثمانتعش", "تسعتعش"
+]
+
+HUNDREDS_CITY = [
+    "", "ميّه", "ميّتين", "ثلاث ميّه", "أربع ميّه", "خمس ميّه",
+    "ست ميّه", "سبع ميّه", "ثمان ميّه", "تسع ميّه"
+]
+
+THOUSANDS_CITY = [
+    "", "ألف", "ألفين", "ثلاث آلاف", "أربع آلاف", "خمس آلاف",
+    "ست آلاف", "سبع آلاف", "ثمان آلاف", "تسع آلاف"
+]
+
+def convert_below_100(n):
+    if n < 10:
+        return ONES_CITY[n]
+    elif 10 <= n < 20:
+        return TEENS_CITY[n - 10]
+    else:
+        ones = n % 10
+        tens = n // 10
+        if ones == 0:
+            return TENS_CITY[tens]
+        return f"{ONES_CITY[ones]} و {TENS_CITY[tens]}"
+
+def convert_below_1000(n):
+    hundreds = n // 100
+    rest = n % 100
+    result = ""
+
+    if hundreds > 0:
+        result += HUNDREDS_CITY[hundreds]
+        if rest > 0:
+            result += " و "
+
+    if rest > 0:
+        result += convert_below_100(rest)
+
+    return result
+
+def convert_to_city_arabic(number):
+    if number == 0:
+        return "صفر"
+
+    if number < 0 or number > 9999:
+        return "الرقم خارج النطاق المدعوم (0 - 9999)"
+
+    thousands = number // 1000
+    rest = number % 1000
+    result = ""
+
+    if thousands > 0:
+        result += THOUSANDS_CITY[thousands]
+        if rest > 0:
+            result += " و "
+
+    if rest > 0:
+        result += convert_below_1000(rest)
+
+    return result
+
+#Test
+if __name__ == "__main__":
+    test_numbers = [0, 1, 2, 12, 23, 99, 100, 101, 215, 999, 1000, 1245, 9999]
+    for num in test_numbers:
+        print(f"{num} → {convert_to_city_arabic(num)}")
