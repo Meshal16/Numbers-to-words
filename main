@@ -9,8 +9,8 @@ TENS_CITY = [
 ]
 
 TEENS_CITY = [
-    "عشره", "حدعش", "اثنعش", "ثلتعش", "أربعتعش", "خمستعش",
-    "ستتعش", "سبعتعش", "ثمانتعش", "تسعتعش"
+    "عشره", "حدعش", "اثنعش", "ثلطعش", "أربعطعش", "خمسطعش",
+    "ستطعش", "سبعطعش", "ثمانطعش", "تسعطعش"
 ]
 
 HUNDREDS_CITY = [
@@ -18,9 +18,22 @@ HUNDREDS_CITY = [
     "ست ميّه", "سبع ميّه", "ثمان ميّه", "تسع ميّه"
 ]
 
-THOUSANDS_CITY = [
-    "", "ألف", "ألفين", "ثلاث آلاف", "أربع آلاف", "خمس آلاف",
-    "ست آلاف", "سبع آلاف", "ثمان آلاف", "تسع آلاف"
+GROUPS_CITY = [
+    "",       
+    "ألف",     
+    "مليون",   
+]
+
+GROUPS_CITY_PLURAL = [
+    "",         
+    "آلاف",     
+    "ملايين"    
+]
+
+GROUPS_CITY_DUAL = [
+    "",         # unused
+    "ألفين",    # 2000
+    "مليونين"   
 ]
 
 def convert_below_100(n):
@@ -50,29 +63,47 @@ def convert_below_1000(n):
 
     return result
 
+def convert_group(n, group_index):
+    if n == 0:
+        return ""
+    elif n == 1:
+        return GROUPS_CITY[group_index]
+    elif n == 2:
+        return GROUPS_CITY_DUAL[group_index]
+    elif 3 <= n <= 10:
+        return f"{convert_below_1000(n)} {GROUPS_CITY_PLURAL[group_index]}"
+    else:
+        return f"{convert_below_1000(n)} {GROUPS_CITY[group_index]}"
+
 def convert_to_city_arabic(number):
     if number == 0:
         return "صفر"
 
-    if number < 0 or number > 9999:
-        return "الرقم خارج النطاق المدعوم (0 - 9999)"
+    if number < 0 or number > 999_999_999:
+        return "الرقم خارج النطاق المدعوم (0 - 999,999,999)"
 
-    thousands = number // 1000
-    rest = number % 1000
-    result = ""
+    millions = number // 1_000_000
+    thousands = (number % 1_000_000) // 1000
+    hundreds = number % 1000
 
-    if thousands > 0:
-        result += THOUSANDS_CITY[thousands]
-        if rest > 0:
-            result += " و "
+    parts = []
 
-    if rest > 0:
-        result += convert_below_1000(rest)
+    if millions:
+        parts.append(convert_group(millions, 2))
 
-    return result
+    if thousands:
+        parts.append(convert_group(thousands, 1))
+
+    if hundreds:
+        parts.append(convert_below_1000(hundreds))
+
+    return " و ".join(parts)
 
 #Test
 if __name__ == "__main__":
-    test_numbers = [0, 1, 2, 12, 23, 99, 100, 101, 215, 999, 1000, 1245, 9999]
+    test_numbers = [
+        0, 5, 12, 100, 215, 999, 1000, 1245, 9999,
+        100000, 2000000, 3150400, 999999999
+    ]
     for num in test_numbers:
         print(f"{num} → {convert_to_city_arabic(num)}")
