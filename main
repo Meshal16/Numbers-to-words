@@ -1,16 +1,11 @@
 
-ONES_CITY = [
-    "", "واحد", "اثنين", "ثلاثه", "أربعه", "خمسه", "سته", "سبعه", "ثمانيه", "تسعه"
-]
+ONES_CITY = ["", "واحد", "اثنين", "ثلاثه", "أربعه", "خمسه", "سته", "سبعه", "ثمانيه", "تسعه"]
 
-TENS_CITY = [
-    "", "عشره", "عشرين", "ثلاثين", "أربعين", "خمسين",
-    "ستين", "سبعين", "ثمانين", "تسعين"
-]
+TENS_CITY = ["", "عشره", "عشرين", "ثلاثين", "أربعين", "خمسين", "ستين", "سبعين", "ثمانين", "تسعين"]
 
 TEENS_CITY = [
-    "عشره", "حدعش", "اثنعش", "ثلطعش", "أربعطعش", "خمسطعش",
-    "ستطعش", "سبعطعش", "ثمانطعش", "تسعطعش"
+    "عشره", "حدعش", "اثنعش", "ثلتعش", "أربعتعش", "خمستعش",
+    "ستتعش", "سبعتعش", "ثمانتعش", "تسعتعش"
 ]
 
 HUNDREDS_CITY = [
@@ -19,21 +14,24 @@ HUNDREDS_CITY = [
 ]
 
 GROUPS_CITY = [
-    "",       
-    "ألف",     
-    "مليون",   
+    "",        # group 0 → ones (unused)
+    "ألف",     # group 1 → thousands
+    "مليون",   # group 2 → millions
+    "مليار"    # group 3 → billions
 ]
 
 GROUPS_CITY_PLURAL = [
-    "",         
-    "آلاف",     
-    "ملايين"    
+    "",         # unused
+    "آلاف",     # thousands (3+)
+    "ملايين",   # millions (3+)
+    "مليارات"   # billions (3+)
 ]
 
 GROUPS_CITY_DUAL = [
     "",         # unused
-    "ألفين",    # 2000
-    "مليونين"   
+    "ألفين",    # 2,000
+    "مليونين",  # 2,000,000
+    "مليارين"   # 2,000,000,000
 ]
 
 def convert_below_100(n):
@@ -52,15 +50,12 @@ def convert_below_1000(n):
     hundreds = n // 100
     rest = n % 100
     result = ""
-
     if hundreds > 0:
         result += HUNDREDS_CITY[hundreds]
         if rest > 0:
             result += " و "
-
     if rest > 0:
         result += convert_below_100(rest)
-
     return result
 
 def convert_group(n, group_index):
@@ -78,22 +73,21 @@ def convert_group(n, group_index):
 def convert_to_city_arabic(number):
     if number == 0:
         return "صفر"
+    if number < 0 or number > 999_999_999_999:
+        return "الرقم خارج النطاق المدعوم (0 - 999,999,999,999)"
 
-    if number < 0 or number > 999_999_999:
-        return "الرقم خارج النطاق المدعوم (0 - 999,999,999)"
-
-    millions = number // 1_000_000
+    billions = number // 1_000_000_000
+    millions = (number % 1_000_000_000) // 1_000_000
     thousands = (number % 1_000_000) // 1000
     hundreds = number % 1000
 
     parts = []
-
+    if billions:
+        parts.append(convert_group(billions, 3))
     if millions:
         parts.append(convert_group(millions, 2))
-
     if thousands:
         parts.append(convert_group(thousands, 1))
-
     if hundreds:
         parts.append(convert_below_1000(hundreds))
 
@@ -102,8 +96,8 @@ def convert_to_city_arabic(number):
 #Test
 if __name__ == "__main__":
     test_numbers = [
-        0, 5, 12, 100, 215, 999, 1000, 1245, 9999,
-        100000, 2000000, 3150400, 999999999
+        0, 1, 12, 99, 1000, 2023, 1_000_000, 3_500_000, 1_000_000_000,
+        2_000_000_000, 4_500_000_000, 7_345_200_999, 999_999_999_999
     ]
     for num in test_numbers:
         print(f"{num} → {convert_to_city_arabic(num)}")
